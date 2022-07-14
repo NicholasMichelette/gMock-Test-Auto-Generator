@@ -29,6 +29,8 @@ run_options.add_argument('-step', action='store_true', help="create mock class f
 run_options.add_argument('-S', '--create_test_suite', action='store_true',
                          help="Create a simple test suite with one empty test per method in "
                               "the class.")
+run_sub_group = parser.add_argument_group()
+run_sub_group.add_argument('-m', '--max_time', type=float, help="specify maximum run time of a test.")
 
 # parse args and get filename
 args = parser.parse_args()
@@ -45,17 +47,26 @@ if args.create_from_class:
     parser = parse_cpp_file(fp)
     mock_class = create_mock_class_from_parser(parser, write_to_disk=True)
 if args.run:
-    run_tests(filename)
+    if args.max_time:
+        run_tests(filename, mtt=args.max_time)
+    else:
+        run_tests(filename)
 if args.test:
     test = args.test
     print(args.test)
-    run_tests(filename, test)
+    if args.max_time:
+        run_tests(filename, test, mtt=args.max_time)
+    else:
+        run_tests(filename, test)
 if args.subtest:
     subtestArgs = args.subtest
     test = subtestArgs[0]
     subtest = subtestArgs[1]
     print(subtestArgs)
-    run_tests(filename, test, subtest)
+    if args.max_time:
+        run_tests(filename, test, subtest, mtt=args.max_time)
+    else:
+        run_tests(filename, test, subtest)
 if args.list:
     find()
 if args.step:
@@ -65,4 +76,4 @@ if args.step:
     mock_class = create_mock_class_from_parser(parser, write_to_disk=False)
     start_step_through_format(parser.detected_class_name, methods)
 if args.create_test_suite:
-    make_empty_test_suite(filename).write_to_file("SUITE_")
+    make_empty_test_suite(filename).write_to_file("SUITE_" + filename)

@@ -5,16 +5,16 @@ passedRegex = re.compile(r'\[  PASSED  \] [0-9]+ test')
 numRegex = re.compile(r'[0-9]+')
 
 
-def run_tests(filename, testname=None, subtestname=None, gtest_flags=[]):
-    sys = platform.system()
+def run_tests(filename, testname=None, subtestname=None, gtest_flags=[], mtt=5):
+    sys_os = platform.system()
     temp = filename
     will_run = True
     command = []
-    if sys == "Windows":
+    if sys_os == "Windows":
         print("Does not work on windows yet.")
-    elif sys == "Darwin":
+    elif sys_os == "Darwin":
         print("Does not work on MAC yet.")
-    elif sys == "Linux" or sys == "Unix":
+    elif sys_os == "Linux" or sys_os == "Unix":
         # if the file name has a .cpp, then compile, if not, just run it
         if filename.endswith('.cpp'):
             compile_file = subprocess.call(["g++", filename, "-orun_tests", "-lgtest", "-lgtest_main", "-pthread"])
@@ -32,7 +32,7 @@ def run_tests(filename, testname=None, subtestname=None, gtest_flags=[]):
                     command.append("--gtest_filter={}.{}*".format(testname, subtestname))
 
             command.extend(gtest_flags)
-            process = run_with_max_time(command, 5)
+            process = run_with_max_time(command, mtt)
             if process is None:
                 print("Tests ran for longer than the maximum allotted time!")
             else:

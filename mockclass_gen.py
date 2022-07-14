@@ -1,14 +1,11 @@
 from cpp_gen import CppClass, CppFile
-from cpp_parser import CPPParser
+from cpp_parser import CPPParser, parse_cpp_file
 import os
 
 
-def parse_cpp_file(file_obj):
-    return CPPParser(file_obj)
-
-
-def create_mock_class_new(class_name, methods, write_to_disk=True):
-    mock_class = MockClass(class_name)
+def create_mock_class_from_parser(parser, write_to_disk=True):
+    mock_class = MockClass(parser.detected_class_name, inherits=parser.has_virtual_method())
+    methods = parser.detect_methods()
     for m in methods:
         params = [] if not m.params else m.params
         p = []
@@ -36,6 +33,7 @@ def create_mock_class_new(class_name, methods, write_to_disk=True):
             mock_file = CppFile()
             mock_file.add_component(mock_class.get_class())
             mock_file.write_to_file(mock_class.name)
+
 
 
 def create_mock_class_from_file(file_obj, write_to_disk=True):
@@ -148,7 +146,8 @@ def mock_user_defined_type(user_type, write_to_disk=True):                  # id
         filename = find_class_file(user_type)
         if filename is not None:
             f = open(filename, 'r')
-            create_mock_class_from_file(f, write_to_disk=write_to_disk)
+            parser = parse_cpp_file(f)
+            create_mock_class_from_parser(parser, write_to_disk=write_to_disk)
 
 
 class MockClass:
